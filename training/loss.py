@@ -107,9 +107,9 @@ def stylegan2(G, D, aug, fake_labels, real_images, real_labels, r1_gamma=10, pl_
     # R1 regularizer from "Which Training Methods for GANs do actually Converge?".
     if r1_gamma != 0:
         with tf.name_scope('Loss_R1'):
-            print("F")
+            print(real_images)
+            print(D_real.scores)
             r1_grads = tf.gradients(tf.reduce_sum(D_real.scores), [real_images])[0]
-            print("s")
             r1_penalty = tf.reduce_sum(tf.square(r1_grads), axis=[1,2,3])
             r1_penalty = report_stat(aug, 'Loss/r1_penalty', r1_penalty)
             D_reg += r1_penalty * (r1_gamma * 0.5)
