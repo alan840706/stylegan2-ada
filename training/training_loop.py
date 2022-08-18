@@ -295,7 +295,14 @@ def training_loop(
                 f"augment {autosummary('Progress/augment', aug.strength if aug is not None else 0):.3f}",
             ]))
             save_count = 1
-            print(cur_tick)
+            if (cur_tick % 5)==0:
+                print(cur_tick)
+                grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
+                save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_tick // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
+                pkl = os.path.join(run_dir, f'network-snapshot-{cur_tick // 1:06d}.pkl')
+                with open(pkl, 'wb') as f:
+                    pickle.dump((G, D, Gs), f)
+                    
             autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
             autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
             if progress_fn is not None:
@@ -306,15 +313,15 @@ def training_loop(
                         metric.run(pkl, num_gpus=num_gpus)
 
             # Save snapshots.
-        if image_snapshot_ticks is not None and (done or cur_tick % image_snapshot_ticks == 0) and save_count ==1:
-            grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
-            save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_tick // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
-            save_count =0
-        if network_snapshot_ticks is not None and (done or cur_tick % network_snapshot_ticks == 0) and save_count==1:
-            pkl = os.path.join(run_dir, f'network-snapshot-{cur_tick // 1:06d}.pkl')
-            with open(pkl, 'wb') as f:
-                pickle.dump((G, D, Gs), f)
-            save_count = 0
+        #if image_snapshot_ticks is not None and (done or cur_tick % image_snapshot_ticks == 0) and save_count ==1:
+            #grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
+            #save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_tick // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
+            #save_count =0
+        #if network_snapshot_ticks is not None and (done or cur_tick % network_snapshot_ticks == 0) and save_count==1:
+            #pkl = os.path.join(run_dir, f'network-snapshot-{cur_tick // 1:06d}.pkl')
+            #with open(pkl, 'wb') as f:
+                #pickle.dump((G, D, Gs), f)
+            #save_count = 0
                 
 
             # Update summaries.
