@@ -101,8 +101,8 @@ def training_loop(
     D_reg_interval          = 16,       # How often the perform regularization for D? Ignored if lazy_regularization=False.
     total_kimg              = 25000,    # Total length of the training, measured in thousands of real images.
     kimg_per_tick           = 4,        # Progress snapshot interval.
-    image_snapshot_ticks    = 10,       # How often to save image snapshots? None = only save 'reals.png' and 'fakes-init.png'.
-    network_snapshot_ticks  = 10,       # How often to save network snapshots? None = only save 'networks-final.pkl'.
+    image_snapshot_ticks    = 5,       # How often to save image snapshots? None = only save 'reals.png' and 'fakes-init.png'.
+    network_snapshot_ticks  = 5,       # How often to save network snapshots? None = only save 'networks-final.pkl'.
     resume_pkl              = None,     # Network pickle to resume training from.
     abort_fn                = None,     # Callback function for determining whether to abort training.
     progress_fn             = None,     # Callback function for updating training progress.
@@ -226,6 +226,7 @@ def training_loop(
     running_mb_counter = 0
 
     done = False
+    save_count = 1
     while not done:
 
         # Compute EMA decay parameter.
@@ -293,6 +294,8 @@ def training_loop(
                 f"gpumem {autosummary('Resources/peak_gpu_mem_gb', peak_gpu_mem_op.eval() / 2**30):<5.1f}",
                 f"augment {autosummary('Progress/augment', aug.strength if aug is not None else 0):.3f}",
             ]))
+            save_count = 1
+            print(cur_tick)
             autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
             autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
             if progress_fn is not None:
@@ -303,13 +306,15 @@ def training_loop(
                         metric.run(pkl, num_gpus=num_gpus)
 
             # Save snapshots.
-        if image_snapshot_ticks is not None and (done or cur_tick % image_snapshot_ticks == 0):
+        if image_snapshot_ticks is not None and (done or cur_tick % image_snapshot_ticks == 0) and save_count ==1:
             grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
-            save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_nimg // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
-        if network_snapshot_ticks is not None and (done or cur_tick % network_snapshot_ticks == 0):
-            pkl = os.path.join(run_dir, f'network-snapshot-{cur_nimg // 1:06d}.pkl')
+            save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_tick // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
+            save_count =0
+        if network_snapshot_ticks is not None and (done or cur_tick % network_snapshot_ticks == 0) and save_count==1:
+            pkl = os.path.join(run_dir, f'network-snapshot-{cur_tick // 1:06d}.pkl')
             with open(pkl, 'wb') as f:
                 pickle.dump((G, D, Gs), f)
+            save_count = 0
                 
 
             # Update summaries.
