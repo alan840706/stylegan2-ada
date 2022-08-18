@@ -108,6 +108,7 @@ def stylegan2(G, D, aug, fake_labels, real_images, real_labels, r1_gamma=10, pl_
     if r1_gamma != 0:
         with tf.name_scope('Loss_R1'):
             print(real_images)
+            print(D_real.scores)
             print(tf.reduce_sum(D_real.scores))
             r1_grads = tf.gradients(tf.reduce_sum(D_real.scores), [real_images])[0]
             r1_penalty = tf.reduce_sum(tf.square(r1_grads), axis=[1,2,3])
