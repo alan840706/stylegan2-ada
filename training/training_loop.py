@@ -297,19 +297,20 @@ def training_loop(
             autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
             if progress_fn is not None:
                 progress_fn(cur_nimg // 1000, total_kimg)
-
-            # Save snapshots.
-            if image_snapshot_ticks is not None and (done or cur_tick % image_snapshot_ticks == 0):
-                grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
-                save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_nimg // 1000:06d}.png'), drange=[-1,1], grid_size=grid_size)
-            if network_snapshot_ticks is not None and (done or cur_tick % network_snapshot_ticks == 0):
-                pkl = os.path.join(run_dir, f'network-snapshot-{cur_nimg // 1000:06d}.pkl')
-                with open(pkl, 'wb') as f:
-                    pickle.dump((G, D, Gs), f)
-                if len(metrics):
+            if len(metrics):
                     print('Evaluating metrics...')
                     for metric in metrics:
                         metric.run(pkl, num_gpus=num_gpus)
+
+            # Save snapshots.
+        if image_snapshot_ticks is not None and (done or cur_tick % image_snapshot_ticks == 0):
+            grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
+            save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_nimg // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
+        if network_snapshot_ticks is not None and (done or cur_tick % network_snapshot_ticks == 0):
+            pkl = os.path.join(run_dir, f'network-snapshot-{cur_nimg // 1:06d}.pkl')
+            with open(pkl, 'wb') as f:
+                pickle.dump((G, D, Gs), f)
+                
 
             # Update summaries.
             for metric in metrics:
