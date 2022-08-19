@@ -295,7 +295,7 @@ def training_loop(
                 f"augment {autosummary('Progress/augment', aug.strength if aug is not None else 0):.3f}",
             ]))
             save_count = 1
-            if (cur_tick % 5)==0:
+            if (cur_tick % 10)==0:
                 print(cur_tick)
                 grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
                 save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_tick // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
