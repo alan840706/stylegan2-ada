@@ -101,8 +101,8 @@ def training_loop(
     D_reg_interval          = 16,       # How often the perform regularization for D? Ignored if lazy_regularization=False.
     total_kimg              = 25000,    # Total length of the training, measured in thousands of real images.
     kimg_per_tick           = 4,        # Progress snapshot interval.
-    image_snapshot_ticks    = 10,       # How often to save image snapshots? None = only save 'reals.png' and 'fakes-init.png'.
-    network_snapshot_ticks  = 10,       # How often to save network snapshots? None = only save 'networks-final.pkl'.
+    image_snapshot_ticks    = 2,       # How often to save image snapshots? None = only save 'reals.png' and 'fakes-init.png'.
+    network_snapshot_ticks  = 2,       # How often to save network snapshots? None = only save 'networks-final.pkl'.
     resume_pkl              = None,     # Network pickle to resume training from.
     abort_fn                = None,     # Callback function for determining whether to abort training.
     progress_fn             = None,     # Callback function for updating training progress.
@@ -295,7 +295,7 @@ def training_loop(
                 f"augment {autosummary('Progress/augment', aug.strength if aug is not None else 0):.3f}",
             ]))
             save_count = 1
-            if (cur_tick % 10)==0:
+            if (cur_tick % 2)==0:
                 print(cur_tick)
                 grid_fakes = Gs.run(grid_latents, grid_labels, is_validation=True, minibatch_size=minibatch_gpu)
                 save_image_grid(grid_fakes, os.path.join(run_dir, f'fakes{cur_tick // 1:06d}.png'), drange=[-1,1], grid_size=grid_size)
