@@ -128,6 +128,7 @@ def training_loop(
             G.copy_vars_from(rG)
             D.copy_vars_from(rD)
             Gs.copy_vars_from(rGs)
+            del f
     G.print_layers()
     D.print_layers()
 
