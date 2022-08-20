@@ -229,7 +229,7 @@ def training_loop(
     done = False
     save_count = 1
     while not done:
-
+        gc.collect()
         # Compute EMA decay parameter.
         Gs_nimg = G_smoothing_kimg * 1000.0
         if G_smoothing_rampup is not None:
