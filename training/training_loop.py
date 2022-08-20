@@ -7,7 +7,7 @@
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
 """Main training loop."""
-
+import gc
 import os
 import pickle
 import time
